@@ -72,14 +72,13 @@ async function main() {
   });
 
   // Add members
-  await prisma.member.createMany({
-    data: [
-      { userId: alice.id, serverId: server.id },
-      { userId: bob.id, serverId: server.id },
-      { userId: charlie.id, serverId: server.id },
-    ],
-    skipDuplicates: true,
-  });
+  for (const user of [alice, bob, charlie]) {
+    await prisma.member.upsert({
+      where: { userId_serverId: { userId: user.id, serverId: server.id } },
+      update: {},
+      create: { userId: user.id, serverId: server.id },
+    });
+  }
 
   // Add some messages to #general
   const generalChannel = server.channels.find((c) => c.name === "general" && c.type === "TEXT");
